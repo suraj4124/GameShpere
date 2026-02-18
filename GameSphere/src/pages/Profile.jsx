@@ -1,5 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import AuthContext from '../context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -73,7 +74,7 @@ const Profile = () => {
             <div className="max-w-3xl mx-auto">
                 <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
                     {/* Header */}
-                    <div className="bg-indigo-900 px-8 py-10 text-white relative overflow-hidden">
+                    <div className="bg-indigo-900 px-6 sm:px-8 py-8 sm:py-10 text-white relative overflow-hidden">
                         <div className="relative z-10 flex items-center gap-6">
                             <div className="w-24 h-24 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-4xl font-bold border-4 border-white/30">
                                 {formData.name.charAt(0)}
@@ -93,7 +94,7 @@ const Profile = () => {
                     </div>
 
                     {/* Form */}
-                    <div className="p-8">
+                    <div className="p-6 sm:p-8">
                         <form onSubmit={onSubmit} className="space-y-6">
                             <h2 className="text-xl font-bold text-gray-900 border-b pb-2 mb-6">Edit Profile</h2>
 
@@ -136,7 +137,13 @@ const Profile = () => {
                             </div>
 
                             {/* Athlete Passport - Hackathon Feature */}
-                            <div className="mt-12 bg-indigo-50 rounded-2xl p-6 border border-indigo-100">
+                            <motion.div
+                                className="mt-12 bg-indigo-50 rounded-2xl p-6 border border-indigo-100"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5 }}
+                            >
                                 <h3 className="text-lg font-bold text-indigo-900 mb-4 flex items-center gap-2">
                                     <span>🎖️</span> Athlete Passport
                                 </h3>
@@ -147,28 +154,40 @@ const Profile = () => {
                                         { icon: "🤝", label: "Teammate", earned: false },
                                         { icon: "⚽", label: "Goal Getter", earned: false }
                                     ].map((badge, idx) => (
-                                        <div key={idx} className={`p-4 rounded-xl flex flex-col items-center justify-center text-center ${badge.earned ? 'bg-white shadow-sm' : 'opacity-40 grayscale bg-gray-100'}`}>
+                                        <motion.div
+                                            key={idx}
+                                            initial={{ opacity: 0, scale: 0.8 }}
+                                            whileInView={{ opacity: 1, scale: 1 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: idx * 0.1 }}
+                                            className={`p-4 rounded-xl flex flex-col items-center justify-center text-center ${badge.earned ? 'bg-white shadow-sm' : 'opacity-40 grayscale bg-gray-100'}`}
+                                        >
                                             <span className="text-2xl mb-2">{badge.icon}</span>
                                             <span className="text-[10px] font-bold uppercase tracking-tight text-gray-600">{badge.label}</span>
-                                        </div>
+                                        </motion.div>
                                     ))}
                                 </div>
-                            </div>
+                            </motion.div>
 
                             {/* Active Stats */}
                             <div className="mt-8 grid grid-cols-3 gap-4">
-                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-                                    <span className="block text-2xl font-bold text-indigo-600">12</span>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase">Games Joined</span>
-                                </div>
-                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-                                    <span className="block text-2xl font-bold text-green-600">5</span>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase">Wins</span>
-                                </div>
-                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-                                    <span className="block text-2xl font-bold text-indigo-600">4.9</span>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase">Rating</span>
-                                </div>
+                                {[
+                                    { label: "Games Joined", value: "12", color: "text-indigo-600" },
+                                    { label: "Wins", value: "5", color: "text-green-600" },
+                                    { label: "Rating", value: "4.9", color: "text-indigo-600" }
+                                ].map((stat, idx) => (
+                                    <motion.div
+                                        key={idx}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: 0.3 + (idx * 0.1) }}
+                                        className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center"
+                                    >
+                                        <span className={`block text-2xl font-bold ${stat.color}`}>{stat.value}</span>
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase">{stat.label}</span>
+                                    </motion.div>
+                                ))}
                             </div>
 
                             <div className="flex justify-end pt-4">

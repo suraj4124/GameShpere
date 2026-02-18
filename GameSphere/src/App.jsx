@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -13,6 +13,7 @@ import About from './pages/About';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster, toast } from 'react-hot-toast';
 import { useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const CommunityActivity = () => {
   useEffect(() => {
@@ -44,6 +45,23 @@ const CommunityActivity = () => {
   return null;
 };
 
+const PageTransition = ({ children }) => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3 }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -51,17 +69,21 @@ function App() {
         <Navbar />
         <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
         <CommunityActivity />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/create-game" element={<ProtectedRoute allowedRoles={['organizer', 'admin']}><CreateGame /></ProtectedRoute>} />
-          <Route path="/find-games" element={<FindGames />} />
-          <Route path="/games/:id" element={<GameDetails />} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/about" element={<About />} />
-        </Routes>
+        <div className="pt-16">
+          <PageTransition>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/create-game" element={<ProtectedRoute allowedRoles={['organizer', 'admin']}><CreateGame /></ProtectedRoute>} />
+              <Route path="/find-games" element={<FindGames />} />
+              <Route path="/games/:id" element={<GameDetails />} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/about" element={<About />} />
+            </Routes>
+          </PageTransition>
+        </div>
       </Router>
     </AuthProvider>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import AuthContext from '../context/AuthContext';
 
 const FindGames = () => {
@@ -8,6 +9,7 @@ const FindGames = () => {
     const [games, setGames] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showRecommended, setShowRecommended] = useState(false); // Toggle state
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     const [filter, setFilter] = useState({
         sport: 'All',
@@ -116,102 +118,138 @@ const FindGames = () => {
             <div className="container mx-auto px-4 py-8">
                 <div className="flex flex-col lg:flex-row gap-8">
 
+                    {/* Mobile Filters Toggle */}
+                    <div className="lg:hidden mb-4">
+                        <button
+                            onClick={() => setShowMobileFilters(!showMobileFilters)}
+                            className="w-full flex items-center justify-between px-6 py-4 bg-white rounded-2xl border border-gray-200 shadow-sm font-bold text-gray-700"
+                        >
+                            <span className="flex items-center gap-2">
+                                <span>🔍</span> {showMobileFilters ? 'Hide Filters' : 'Show Filters'}
+                            </span>
+                            <span className="text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg text-xs">
+                                {filter.sport !== 'All' ? filter.sport : 'All Sports'}
+                            </span>
+                        </button>
+                    </div>
+
                     {/* Sidebar Filters */}
-                    <aside className="w-full lg:w-1/4 space-y-8">
-                        <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="font-bold text-lg text-gray-900">Filters</h3>
-                                <button className="text-sm text-indigo-600 font-semibold hover:underline" onClick={() => setFilter({ sport: 'All', location: '', date: '', skillLevel: 'Any Level' })}>Reset All</button>
-                            </div>
+                    <AnimatePresence>
+                        {(showMobileFilters || window.innerWidth >= 1024) && (
+                            <motion.aside
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className={`w-full lg:w-1/4 space-y-8 overflow-hidden lg:block ${showMobileFilters ? 'block' : 'hidden'}`}
+                            >
+                                <div className="bg-white lg:bg-transparent p-6 lg:p-0 rounded-2xl border lg:border-none border-gray-100 shadow-sm lg:shadow-none">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="font-bold text-lg text-gray-900">Filters</h3>
+                                        <button className="text-sm text-indigo-600 font-semibold hover:underline" onClick={() => setFilter({ sport: 'All', location: '', date: '', skillLevel: 'Any Level' })}>Reset All</button>
+                                    </div>
 
-                            {/* Location */}
-                            <div className="mb-6">
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Location</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2.5 text-gray-400">📍</span>
-                                    <input
-                                        type="text"
-                                        placeholder="City or Zip Code"
-                                        className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
-                                        value={filter.location}
-                                        onChange={(e) => setFilter({ ...filter, location: e.target.value })}
-                                    />
-                                </div>
-                                <div className="mt-4">
-                                    <label className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                                        <span>Distance</span>
-                                        <span className="text-indigo-600">15 km</span>
-                                    </label>
-                                    <input type="range" className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
-                                </div>
-                            </div>
-
-                            {/* Sport */}
-                            <div className="mb-6">
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sport</label>
-                                <div className="space-y-2">
-                                    {/* My Sports Option */}
-                                    {user && (
-                                        <label className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${filter.sport === 'My Sports' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:bg-gray-50'}`}>
+                                    {/* Location */}
+                                    <div className="mb-6">
+                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Location</label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-2.5 text-gray-400">📍</span>
                                             <input
-                                                type="radio"
-                                                name="sport"
-                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                                checked={filter.sport === 'My Sports'}
-                                                onChange={() => setFilter({ ...filter, sport: 'My Sports' })}
+                                                type="text"
+                                                placeholder="City or Zip Code"
+                                                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
+                                                value={filter.location}
+                                                onChange={(e) => setFilter({ ...filter, location: e.target.value })}
                                             />
-                                            <span className={`ml-3 text-sm font-medium ${filter.sport === 'My Sports' ? 'text-indigo-900' : 'text-gray-700'}`}>My Sports ({user.sports?.length || 0})</span>
-                                        </label>
-                                    )}
+                                        </div>
+                                        <div className="mt-4">
+                                            <label className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                                <span>Distance</span>
+                                                <span className="text-indigo-600">15 km</span>
+                                            </label>
+                                            <input type="range" className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                                        </div>
+                                    </div>
 
-                                    {['Football', 'Basketball', 'Tennis', 'Swimming', 'Cricket'].map(s => (
-                                        <label key={s} className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${filter.sport === s ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:bg-gray-50'}`}>
-                                            <input
-                                                type="radio"
-                                                name="sport"
-                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                                checked={filter.sport === s}
-                                                onChange={() => setFilter({ ...filter, sport: s })}
-                                            />
-                                            <span className={`ml-3 text-sm font-medium ${filter.sport === s ? 'text-indigo-900' : 'text-gray-700'}`}>{s}</span>
-                                            {filter.sport === s && <span className="ml-auto text-indigo-600">✓</span>}
-                                        </label>
-                                    ))}
-                                    <label className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${filter.sport === 'All' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:bg-gray-50'}`}>
-                                        <input
-                                            type="radio"
-                                            name="sport"
-                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                            checked={filter.sport === 'All'}
-                                            onChange={() => setFilter({ ...filter, sport: 'All' })}
-                                        />
-                                        <span className={`ml-3 text-sm font-medium ${filter.sport === 'All' ? 'text-indigo-900' : 'text-gray-700'}`}>All Sports</span>
-                                    </label>
+                                    {/* Sport */}
+                                    <div className="mb-6">
+                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sport</label>
+                                        <div className="space-y-2">
+                                            {/* My Sports Option */}
+                                            {user && (
+                                                <label className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${filter.sport === 'My Sports' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:bg-gray-50'}`}>
+                                                    <input
+                                                        type="radio"
+                                                        name="sport"
+                                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                        checked={filter.sport === 'My Sports'}
+                                                        onChange={() => {
+                                                            setFilter({ ...filter, sport: 'My Sports' });
+                                                            if (window.innerWidth < 1024) setShowMobileFilters(false);
+                                                        }}
+                                                    />
+                                                    <span className={`ml-3 text-sm font-medium ${filter.sport === 'My Sports' ? 'text-indigo-900' : 'text-gray-700'}`}>My Sports ({user.sports?.length || 0})</span>
+                                                </label>
+                                            )}
+
+                                            {['Football', 'Basketball', 'Tennis', 'Swimming', 'Cricket'].map(s => (
+                                                <label key={s} className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${filter.sport === s ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:bg-gray-50'}`}>
+                                                    <input
+                                                        type="radio"
+                                                        name="sport"
+                                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                        checked={filter.sport === s}
+                                                        onChange={() => {
+                                                            setFilter({ ...filter, sport: s });
+                                                            if (window.innerWidth < 1024) setShowMobileFilters(false);
+                                                        }}
+                                                    />
+                                                    <span className={`ml-3 text-sm font-medium ${filter.sport === s ? 'text-indigo-900' : 'text-gray-700'}`}>{s}</span>
+                                                    {filter.sport === s && <span className="ml-auto text-indigo-600">✓</span>}
+                                                </label>
+                                            ))}
+                                            <label className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${filter.sport === 'All' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:bg-gray-50'}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="sport"
+                                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                    checked={filter.sport === 'All'}
+                                                    onChange={() => {
+                                                        setFilter({ ...filter, sport: 'All' });
+                                                        if (window.innerWidth < 1024) setShowMobileFilters(false);
+                                                    }}
+                                                />
+                                                <span className={`ml-3 text-sm font-medium ${filter.sport === 'All' ? 'text-indigo-900' : 'text-gray-700'}`}>All Sports</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Skill Level */}
+                                    <div className="mb-6">
+                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Skill Level</label>
+                                        <select
+                                            className="w-full p-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500"
+                                            value={filter.skillLevel}
+                                            onChange={(e) => {
+                                                setFilter({ ...filter, skillLevel: e.target.value });
+                                                if (window.innerWidth < 1024) setShowMobileFilters(false);
+                                            }}
+                                        >
+                                            <option>Any Level</option>
+                                            <option>Beginner</option>
+                                            <option>Intermediate</option>
+                                            <option>Pro</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Date */}
+                                    <div className="mb-6">
+                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Date</label>
+                                        <input type="date" className="w-full p-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 text-gray-500" />
+                                    </div>
                                 </div>
-                            </div>
-
-                            {/* Skill Level */}
-                            <div className="mb-6">
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Skill Level</label>
-                                <select
-                                    className="w-full p-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500"
-                                    value={filter.skillLevel}
-                                    onChange={(e) => setFilter({ ...filter, skillLevel: e.target.value })}
-                                >
-                                    <option>Any Level</option>
-                                    <option>Beginner</option>
-                                    <option>Intermediate</option>
-                                    <option>Pro</option>
-                                </select>
-                            </div>
-
-                            {/* Date */}
-                            <div className="mb-6">
-                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Date</label>
-                                <input type="date" className="w-full p-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 text-gray-500" />
-                            </div>
-                        </div>
-                    </aside>
+                            </motion.aside>
+                        )}
+                    </AnimatePresence>
 
                     {/* Main Content */}
                     <main className="flex-1">
@@ -252,96 +290,118 @@ const FindGames = () => {
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                {filteredGames.length > 0 ? filteredGames.map(game => {
-                                    const isJoined = user && game.players.some(p => (p._id || p) === user._id);
-                                    return (
-                                        <div key={game._id} className={`bg-white rounded-2xl border ${isJoined ? 'border-indigo-500 ring-2 ring-indigo-50' : 'border-gray-100'} shadow-sm hover:shadow-xl transition duration-300 flex flex-col overflow-hidden group`}>
-                                            {/* Card Image Header */}
-                                            <div className="h-40 relative overflow-hidden">
-                                                <img
-                                                    src={getSportImage(game.sport)}
-                                                    alt={game.sport}
-                                                    className="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"
-                                                />
-                                                <div className="absolute top-4 left-4 flex gap-2">
-                                                    <span className="bg-white/90 backdrop-blur text-gray-800 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                                                        {game.sport === 'Soccer' ? '⚽' : game.sport === 'Basketball' ? '🏀' : '🎮'} {game.sport}
-                                                    </span>
-                                                </div>
-                                                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
-                                                    <span className={`text-xs font-bold px-3 py-1 rounded-full shadow-sm ${game.entryFee === 0 ? 'bg-green-500 text-white' : 'bg-gray-900 text-white'}`}>
-                                                        {game.entryFee === 0 ? 'Free' : `$${game.entryFee}`}
-                                                    </span>
-                                                    {isJoined && (
-                                                        <span className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm uppercase tracking-wide">
-                                                            Joined
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Card Body */}
-                                            <div className="p-5 flex-1 flex flex-col">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h3 className="font-bold text-lg text-gray-900 leading-tight">
-                                                        {game.description && game.description.length > 20 ? game.description.substring(0, 30) + '...' : `${game.sport} Match`}
-                                                    </h3>
-                                                    <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${getSkillColor(game.skillLevel)}`}>
-                                                        {game.skillLevel}
-                                                    </span>
-                                                </div>
-
-                                                <div className="space-y-2 mt-2 mb-6">
-                                                    <div className="flex items-center text-sm text-gray-500">
-                                                        <span className="w-5 text-center mr-2">📅</span>
-                                                        {new Date(game.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} • {new Date(game.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                    <div className="flex items-center text-sm text-gray-500">
-                                                        <span className="w-5 text-center mr-2">📍</span>
-                                                        {game.location.split(',')[0]}
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-auto">
-                                                    <div className="flex justify-between text-xs font-semibold text-gray-500 mb-1">
-                                                        <span>Players</span>
-                                                        <span className={game.players.length >= game.maxPlayers ? 'text-red-500' : 'text-green-600'}>
-                                                            {game.players.length}/{game.maxPlayers} spots filled
+                            <motion.div
+                                layout
+                                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                            >
+                                <AnimatePresence mode="popLayout">
+                                    {filteredGames.length > 0 ? filteredGames.map((game, idx) => {
+                                        const isJoined = user && game.players.some(p => (p._id || p) === user._id);
+                                        return (
+                                            <motion.div
+                                                layout
+                                                key={game._id}
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.9 }}
+                                                transition={{ duration: 0.3, delay: idx * 0.05 }}
+                                                className={`bg-white rounded-2xl border ${isJoined ? 'border-indigo-500 ring-2 ring-indigo-50' : 'border-gray-100'} shadow-sm hover:shadow-xl transition duration-300 flex flex-col overflow-hidden group`}
+                                            >
+                                                {/* Card Image Header */}
+                                                <div className="h-40 relative overflow-hidden">
+                                                    <img
+                                                        src={getSportImage(game.sport)}
+                                                        alt={game.sport}
+                                                        className="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"
+                                                    />
+                                                    <div className="absolute top-4 left-4 flex gap-2">
+                                                        <span className="bg-white/90 backdrop-blur text-gray-800 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                                                            {game.sport === 'Soccer' ? '⚽' : game.sport === 'Basketball' ? '🏀' : '🎮'} {game.sport}
                                                         </span>
                                                     </div>
-                                                    <div className="w-full bg-gray-100 rounded-full h-2 mb-4 overflow-hidden">
-                                                        <div
-                                                            className={`h-full rounded-full ${game.players.length >= game.maxPlayers ? 'bg-red-500' : 'bg-green-500'}`}
-                                                            style={{ width: `${(game.players.length / game.maxPlayers) * 100}%` }}
-                                                        ></div>
+                                                    <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+                                                        <span className={`text-xs font-bold px-3 py-1 rounded-full shadow-sm ${game.entryFee === 0 ? 'bg-green-500 text-white' : 'bg-gray-900 text-white'}`}>
+                                                            {game.entryFee === 0 ? 'Free' : `$${game.entryFee}`}
+                                                        </span>
+                                                        {isJoined && (
+                                                            <span className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm uppercase tracking-wide">
+                                                                Joined
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Card Body */}
+                                                <div className="p-5 flex-1 flex flex-col">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h3 className="font-bold text-lg text-gray-900 leading-tight">
+                                                            {game.description && game.description.length > 20 ? game.description.substring(0, 30) + '...' : `${game.sport} Match`}
+                                                        </h3>
+                                                        <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${getSkillColor(game.skillLevel)}`}>
+                                                            {game.skillLevel}
+                                                        </span>
                                                     </div>
 
-                                                    <Link
-                                                        to={`/games/${game._id}`}
-                                                        className={`w-full block text-center py-2.5 rounded-lg font-bold text-sm transition ${isJoined
+                                                    <div className="space-y-2 mt-2 mb-6">
+                                                        <div className="flex items-center text-sm text-gray-500">
+                                                            <span className="w-5 text-center mr-2">📅</span>
+                                                            {new Date(game.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} • {new Date(game.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </div>
+                                                        <div className="flex items-center text-sm text-gray-500">
+                                                            <span className="w-5 text-center mr-2">📍</span>
+                                                            {game.location.split(',')[0]}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mt-auto">
+                                                        <div className="flex justify-between text-xs font-semibold text-gray-500 mb-1">
+                                                            <span>Players</span>
+                                                            <span className={game.players.length >= game.maxPlayers ? 'text-red-500' : 'text-green-600'}>
+                                                                {game.players.length}/{game.maxPlayers} spots filled
+                                                            </span>
+                                                        </div>
+                                                        <div className="w-full bg-gray-100 rounded-full h-2 mb-4 overflow-hidden">
+                                                            <div
+                                                                className={`h-full rounded-full ${game.players.length >= game.maxPlayers ? 'bg-red-500' : 'bg-green-500'}`}
+                                                                style={{ width: `${(game.players.length / game.maxPlayers) * 100}%` }}
+                                                            ></div>
+                                                        </div>
+
+                                                        <Link
+                                                            to={`/games/${game._id}`}
+                                                            className={`w-full block text-center py-2.5 rounded-lg font-bold text-sm transition ${isJoined
                                                                 ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border border-indigo-200'
                                                                 : game.players.length >= game.maxPlayers
                                                                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                                     : 'bg-green-500 text-white hover:bg-green-600 shadow-md shadow-green-200'
-                                                            }`}
-                                                    >
-                                                        {isJoined ? 'View Details' : (game.players.length >= game.maxPlayers ? 'Match Full' : 'Join Match')}
-                                                    </Link>
+                                                                }`}
+                                                        >
+                                                            {isJoined ? 'View Details' : (game.players.length >= game.maxPlayers ? 'Match Full' : 'Join Match')}
+                                                        </Link>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    );
-                                }) : (
-                                    <div className="col-span-full flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-dashed border-gray-300">
-                                        <div className="text-4xl mb-4">🔍</div>
-                                        <h3 className="text-xl font-bold text-gray-900 mb-2">No matches found</h3>
-                                        <p className="text-gray-500 mb-6 text-center max-w-sm">We couldn't find any games matching your current filters. Try adjusting them or create your own!</p>
-                                        <button onClick={() => setFilter({ sport: 'All', location: '', date: '', skillLevel: 'Any Level' })} className="text-indigo-600 font-bold hover:underline mb-2">Clear Filters</button>
-                                        <Link to="/create-game" className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition">Create Game</Link>
-                                    </div>
-                                )}
-                            </div>
+                                            </motion.div>
+                                        );
+                                    }) : (
+                                        <motion.div
+                                            layout
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className="col-span-full flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-dashed border-gray-200"
+                                        >
+                                            <div className="text-5xl mb-4">🔍</div>
+                                            <h3 className="text-xl font-bold text-gray-900 mb-2">No games found</h3>
+                                            <p className="text-gray-500 max-w-xs text-center">Try adjusting your filters or location to find more matches nearby.</p>
+                                            <button
+                                                onClick={() => setFilter({ sport: 'All', location: '', date: '', skillLevel: 'Any Level' })}
+                                                className="mt-6 text-indigo-600 font-bold hover:underline"
+                                            >
+                                                Clear all filters
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </motion.div>
                         )}
 
                         {filteredGames.length > 0 && (

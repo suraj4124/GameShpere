@@ -68,9 +68,9 @@ const Home = () => {
                             <span className="inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold tracking-wider uppercase mb-6">
                                 Community Sports
                             </span>
-                            <h1 className="text-5xl lg:text-7xl font-extrabold leading-tight text-gray-900 mb-6 tracking-tight">
-                                Find Your Game. <br />
-                                <span className="text-indigo-600">Build Your Team.</span>
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold leading-tight text-gray-900 mb-6 tracking-tight">
+                                Find Your Game. <br className="hidden sm:block" />
+                                <span className="text-indigo-600 border-b-4 border-indigo-100 sm:border-none">Build Your Team.</span>
                             </h1>
                             <p className="text-lg text-gray-500 mb-8 leading-relaxed max-w-lg">
                                 The easiest way to connect with local athletes, join pickup games, and organize tournaments in your community.
@@ -134,7 +134,7 @@ const Home = () => {
                         <p className="text-gray-500 max-w-xl mx-auto">Get into the game in three simple steps. No hassle, just pure sport.</p>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
                         {[
                             { icon: "🔍", title: "Discover", desc: "Search for games nearby based on your skill level, location, and preferred sport." },
                             { icon: "👥", title: "Join", desc: "Sign up for a slot instantly. Join a team or sign up as a free agent for pickup games." },
@@ -162,7 +162,7 @@ const Home = () => {
             </section>
 
             {/* Popular Sports */}
-            <section className="py-20 lg:py-28">
+            <section className="py-12 lg:py-28">
                 <div className="container mx-auto px-4">
                     <div className="flex justify-between items-end mb-12">
                         <div>
@@ -217,7 +217,7 @@ const Home = () => {
                             <Link to="/find-games" className="text-indigo-600 font-bold hover:underline">See suggestions →</Link>
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
                             {recommendedGames.map((game, idx) => (
                                 <motion.div
                                     key={game._id}
@@ -253,8 +253,8 @@ const Home = () => {
             {/* MVP Leaderboard - Hackathon Feature */}
             <section className="py-20">
                 <div className="container mx-auto px-4">
-                    <div className="max-w-5xl mx-auto rounded-[2.5rem] bg-white border border-gray-100 shadow-2xl shadow-indigo-100 overflow-hidden flex flex-col lg:flex-row">
-                        <div className="lg:w-1/3 bg-indigo-900 p-12 text-white">
+                    <div className="max-w-5xl mx-auto rounded-3xl lg:rounded-[2.5rem] bg-white border border-gray-100 shadow-2xl shadow-indigo-100 overflow-hidden flex flex-col lg:flex-row">
+                        <div className="lg:w-1/3 bg-indigo-900 p-8 lg:p-12 text-white">
                             <h2 className="text-3xl font-bold mb-4">MVP Organizers</h2>
                             <p className="text-indigo-200 text-sm mb-8">The most active community builders this month.</p>
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-xs font-bold backdrop-blur-sm">
@@ -317,7 +317,7 @@ const Home = () => {
                             <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-8 backdrop-blur-sm shadow-lg">
                                 👥
                             </div>
-                            <h2 className="text-3xl lg:text-5xl font-bold text-white mb-6">Ready to hit the field?</h2>
+                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">Ready to hit the field?</h2>
                             <p className="text-indigo-200 text-lg max-w-2xl mx-auto mb-10">
                                 Join thousands of players already organizing games in your city. It's free to get started.
                             </p>

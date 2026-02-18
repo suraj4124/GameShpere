@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import AuthContext from '../context/AuthContext';
 
 const Login = () => {
@@ -25,9 +26,14 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex bg-white">
+        <div className="min-h-screen flex bg-white overflow-hidden">
             {/* Left Side - Form */}
-            <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 lg:p-24 overflow-y-auto">
+            <motion.div
+                className="w-full lg:w-1/2 flex flex-col justify-center p-8 md:p-16 lg:p-24 overflow-y-auto"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+            >
                 <div className="mb-12">
                     <Link to="/" className="flex items-center gap-2 text-indigo-900 font-extrabold text-2xl mb-12">
                         🏀 GameSphere
@@ -93,10 +99,15 @@ const Login = () => {
                         Create free account
                     </Link>
                 </p>
-            </div>
+            </motion.div>
 
             {/* Right Side - Image/Testimonial */}
-            <div className="hidden lg:block lg:w-1/2 relative">
+            <motion.div
+                className="hidden lg:block lg:w-1/2 relative"
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+            >
                 <img
                     src="https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2070&auto=format&fit=crop"
                     alt="Gym athletes"
@@ -116,7 +127,7 @@ const Login = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };

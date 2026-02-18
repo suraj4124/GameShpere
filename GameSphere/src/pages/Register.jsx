@@ -1,5 +1,6 @@
 import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import AuthContext from '../context/AuthContext';
 
 const Register = () => {
@@ -8,14 +9,14 @@ const Register = () => {
         email: '',
         password: '',
         role: 'player',
-        sports: '', // Hidden in this simplified design or added as step 2? simplified for now as per image
+        sports: '',
         skillLevel: 'Beginner',
         location: ''
     });
     const { register } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    const { name, email, password, role, sports, skillLevel } = formData;
+    const { name, email, password, role } = formData;
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
     const setRole = (r) => setFormData({ ...formData, role: r });
@@ -23,9 +24,7 @@ const Register = () => {
     const onSubmit = async e => {
         e.preventDefault();
         try {
-            // Convert sports string to array
             const sportsArray = formData.sports.split(',').map(s => s.trim()).filter(s => s);
-
             await register({
                 ...formData,
                 sports: sportsArray
@@ -37,9 +36,42 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex bg-white">
-            {/* Left Side - Form */}
-            <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 lg:p-24 overflow-y-auto">
+        <div className="min-h-screen flex bg-white overflow-hidden">
+            {/* Left Side - Image/Testimonial */}
+            <motion.div
+                className="hidden lg:block lg:w-1/2 relative"
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+            >
+                <img
+                    src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=2069&auto=format&fit=crop"
+                    alt="Running athletes"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+
+                <div className="absolute bottom-16 left-16 right-16 text-white">
+                    <h2 className="text-4xl font-extrabold leading-tight mb-6">
+                        "GameSphere made it incredibly easy to find a local league. Now I play every Tuesday!"
+                    </h2>
+                    <div className="flex items-center gap-4">
+                        <img src="https://i.pravatar.cc/150?img=11" alt="User" className="w-12 h-12 rounded-full border-2 border-white/50" />
+                        <div>
+                            <p className="font-bold text-lg">Marcus Johnson</p>
+                            <p className="text-gray-300 text-sm">Amateur Soccer Player</p>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* Right Side - Form */}
+            <motion.div
+                className="w-full lg:w-1/2 flex flex-col justify-center p-8 md:p-16 lg:p-24 overflow-y-auto"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+            >
                 <div className="mb-10">
                     <Link to="/" className="flex items-center gap-2 text-indigo-900 font-extrabold text-2xl mb-12">
                         🏀 GameSphere
@@ -141,30 +173,7 @@ const Register = () => {
                         Log In
                     </Link>
                 </p>
-            </div>
-
-            {/* Right Side - Image/Testimonial */}
-            <div className="hidden lg:block lg:w-1/2 relative">
-                <img
-                    src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=2069&auto=format&fit=crop"
-                    alt="Running athletes"
-                    className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-
-                <div className="absolute bottom-16 left-16 right-16 text-white">
-                    <h2 className="text-4xl font-extrabold leading-tight mb-6">
-                        "GameSphere made it incredibly easy to find a local league. Now I play every Tuesday!"
-                    </h2>
-                    <div className="flex items-center gap-4">
-                        <img src="https://i.pravatar.cc/150?img=11" alt="User" className="w-12 h-12 rounded-full border-2 border-white/50" />
-                        <div>
-                            <p className="font-bold text-lg">Marcus Johnson</p>
-                            <p className="text-gray-300 text-sm">Amateur Soccer Player</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </motion.div>
         </div>
     );
 };
