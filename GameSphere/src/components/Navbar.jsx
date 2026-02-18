@@ -23,7 +23,10 @@ const Navbar = () => {
         { path: '/find-games', label: 'Games' },
         { path: '/events', label: 'Events' },
         { path: '/about', label: 'About' },
-    ];
+    ].filter(link => {
+        if (link.label === 'Games' && !user) return false;
+        return true;
+    });
 
     const menuVariants = {
         closed: {
