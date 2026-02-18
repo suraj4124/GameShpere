@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import AuthContext from '../context/AuthContext';
 
 const FindGames = () => {
+    const { user } = useContext(AuthContext); // Add context
     const [games, setGames] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showRecommended, setShowRecommended] = useState(false); // Toggle state
+
     const [filter, setFilter] = useState({
         sport: 'All',
         location: '',
@@ -12,11 +16,50 @@ const FindGames = () => {
         skillLevel: 'Any Level'
     });
 
+    // Set defaults based on user profile when logged in
+    useEffect(() => {
+        if (user) {
+            // Default to recommended settings
+            setShowRecommended(true);
+            setFilter(prev => ({
+                ...prev,
+                sport: 'My Sports',
+                skillLevel: 'Any Level', // Default to Any Level to ensure games show up
+                location: ''
+            }));
+        }
+    }, [user]);
+
+    const toggleRecommended = () => {
+        if (!showRecommended) {
+            // Switch to Recommended
+            setShowRecommended(true);
+            if (user) {
+                setFilter(prev => ({
+                    ...prev,
+                    sport: 'My Sports',
+                    skillLevel: 'Any Level', // Default to Any Level to ensure games show up
+                    location: ''
+                }));
+            }
+        } else {
+            // Switch to All
+            setShowRecommended(false);
+            setFilter({
+                sport: 'All',
+                location: '',
+                date: '',
+                skillLevel: 'Any Level'
+            });
+        }
+    };
+
     useEffect(() => {
         const fetchGames = async () => {
+            // ... existing fetch logic
             try {
                 const res = await axios.get('/api/games');
-                setGames(res.data);
+                setGames(res.data.data);
                 setLoading(false);
             } catch (err) {
                 console.error(err);
@@ -27,10 +70,28 @@ const FindGames = () => {
     }, []);
 
     const filteredGames = games.filter(game => {
-        const matchSport = filter.sport === 'All' || game.sport.toLowerCase() === filter.sport.toLowerCase();
+        let matchSport = false;
+        if (filter.sport === 'All') {
+            matchSport = true;
+        } else if (filter.sport === 'My Sports') {
+            // Match games if they are in user's preferred sports OR if the user has joined them
+            const isPreferred = user && user.sports && user.sports.includes(game.sport);
+            const isJoined = user && game.players && game.players.some(p => (p._id || p) === user._id);
+            matchSport = isPreferred || isJoined;
+        } else {
+            matchSport = game.sport.toLowerCase() === filter.sport.toLowerCase();
+        }
+
         const matchLocation = game.location.toLowerCase().includes(filter.location.toLowerCase());
-        const matchSkill = filter.skillLevel === 'Any Level' || game.skillLevel === filter.skillLevel;
-        // Date match could be added here
+
+        // Skill logic: 
+        // If filter is "Any Level", show everything.
+        // If game is "All Levels", show it regardless of filter.
+        // If filter matches game level, show it.
+        const matchSkill = filter.skillLevel === 'Any Level' ||
+            game.skillLevel === 'All Levels' ||
+            game.skillLevel === filter.skillLevel;
+
         return matchSport && matchLocation && matchSkill;
     });
 
@@ -89,7 +150,21 @@ const FindGames = () => {
                             <div className="mb-6">
                                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sport</label>
                                 <div className="space-y-2">
-                                    {['Basketball', 'Soccer', 'Tennis', 'Swimming', 'Cricket'].map(s => (
+                                    {/* My Sports Option */}
+                                    {user && (
+                                        <label className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${filter.sport === 'My Sports' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:bg-gray-50'}`}>
+                                            <input
+                                                type="radio"
+                                                name="sport"
+                                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                checked={filter.sport === 'My Sports'}
+                                                onChange={() => setFilter({ ...filter, sport: 'My Sports' })}
+                                            />
+                                            <span className={`ml-3 text-sm font-medium ${filter.sport === 'My Sports' ? 'text-indigo-900' : 'text-gray-700'}`}>My Sports ({user.sports?.length || 0})</span>
+                                        </label>
+                                    )}
+
+                                    {['Football', 'Basketball', 'Tennis', 'Swimming', 'Cricket'].map(s => (
                                         <label key={s} className={`flex items-center p-3 rounded-lg border cursor-pointer transition ${filter.sport === s ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 bg-white hover:bg-gray-50'}`}>
                                             <input
                                                 type="radio"
@@ -144,6 +219,23 @@ const FindGames = () => {
                             <div>
                                 <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Find a Match</h1>
                                 <p className="text-gray-500">Discover local games and join the community.</p>
+
+                                {user && (
+                                    <div className="mt-4 flex items-center bg-gray-100 p-1 rounded-lg w-fit">
+                                        <button
+                                            onClick={toggleRecommended}
+                                            className={`px-4 py-2 text-sm font-bold rounded-md transition ${showRecommended ? 'bg-white text-indigo-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                        >
+                                            For You
+                                        </button>
+                                        <button
+                                            onClick={toggleRecommended}
+                                            className={`px-4 py-2 text-sm font-bold rounded-md transition ${!showRecommended ? 'bg-white text-indigo-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                        >
+                                            All Games
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             <div className="flex gap-2 bg-white p-1 rounded-lg border border-gray-200 shadow-sm">
                                 <button className="p-2 bg-gray-100 rounded text-gray-600 hover:text-indigo-600">
@@ -161,73 +253,86 @@ const FindGames = () => {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                {filteredGames.length > 0 ? filteredGames.map(game => (
-                                    <div key={game._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition duration-300 flex flex-col overflow-hidden group">
-                                        {/* Card Image Header */}
-                                        <div className="h-40 relative overflow-hidden">
-                                            <img
-                                                src={getSportImage(game.sport)}
-                                                alt={game.sport}
-                                                className="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"
-                                            />
-                                            <div className="absolute top-4 left-4 flex gap-2">
-                                                <span className="bg-white/90 backdrop-blur text-gray-800 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                                                    {game.sport === 'Soccer' ? '⚽' : game.sport === 'Basketball' ? '🏀' : '🎮'} {game.sport}
-                                                </span>
-                                            </div>
-                                            <div className="absolute top-4 right-4">
-                                                <span className={`text-xs font-bold px-3 py-1 rounded-full shadow-sm ${game.entryFee === 0 ? 'bg-green-500 text-white' : 'bg-gray-900 text-white'}`}>
-                                                    {game.entryFee === 0 ? 'Free' : `$${game.entryFee}`}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Card Body */}
-                                        <div className="p-5 flex-1 flex flex-col">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h3 className="font-bold text-lg text-gray-900 leading-tight">
-                                                    {game.description && game.description.length > 20 ? game.description.substring(0, 30) + '...' : `${game.sport} Match`}
-                                                </h3>
-                                                <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${getSkillColor(game.skillLevel)}`}>
-                                                    {game.skillLevel}
-                                                </span>
-                                            </div>
-
-                                            <div className="space-y-2 mt-2 mb-6">
-                                                <div className="flex items-center text-sm text-gray-500">
-                                                    <span className="w-5 text-center mr-2">📅</span>
-                                                    {new Date(game.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} • {new Date(game.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </div>
-                                                <div className="flex items-center text-sm text-gray-500">
-                                                    <span className="w-5 text-center mr-2">📍</span>
-                                                    {game.location.split(',')[0]}
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-auto">
-                                                <div className="flex justify-between text-xs font-semibold text-gray-500 mb-1">
-                                                    <span>Players</span>
-                                                    <span className={game.players.length >= game.maxPlayers ? 'text-red-500' : 'text-green-600'}>
-                                                        {game.players.length}/{game.maxPlayers} spots filled
+                                {filteredGames.length > 0 ? filteredGames.map(game => {
+                                    const isJoined = user && game.players.some(p => (p._id || p) === user._id);
+                                    return (
+                                        <div key={game._id} className={`bg-white rounded-2xl border ${isJoined ? 'border-indigo-500 ring-2 ring-indigo-50' : 'border-gray-100'} shadow-sm hover:shadow-xl transition duration-300 flex flex-col overflow-hidden group`}>
+                                            {/* Card Image Header */}
+                                            <div className="h-40 relative overflow-hidden">
+                                                <img
+                                                    src={getSportImage(game.sport)}
+                                                    alt={game.sport}
+                                                    className="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"
+                                                />
+                                                <div className="absolute top-4 left-4 flex gap-2">
+                                                    <span className="bg-white/90 backdrop-blur text-gray-800 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                                                        {game.sport === 'Soccer' ? '⚽' : game.sport === 'Basketball' ? '🏀' : '🎮'} {game.sport}
                                                     </span>
                                                 </div>
-                                                <div className="w-full bg-gray-100 rounded-full h-2 mb-4 overflow-hidden">
-                                                    <div
-                                                        className={`h-full rounded-full ${game.players.length >= game.maxPlayers ? 'bg-red-500' : 'bg-green-500'}`}
-                                                        style={{ width: `${(game.players.length / game.maxPlayers) * 100}%` }}
-                                                    ></div>
+                                                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+                                                    <span className={`text-xs font-bold px-3 py-1 rounded-full shadow-sm ${game.entryFee === 0 ? 'bg-green-500 text-white' : 'bg-gray-900 text-white'}`}>
+                                                        {game.entryFee === 0 ? 'Free' : `$${game.entryFee}`}
+                                                    </span>
+                                                    {isJoined && (
+                                                        <span className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm uppercase tracking-wide">
+                                                            Joined
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Card Body */}
+                                            <div className="p-5 flex-1 flex flex-col">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <h3 className="font-bold text-lg text-gray-900 leading-tight">
+                                                        {game.description && game.description.length > 20 ? game.description.substring(0, 30) + '...' : `${game.sport} Match`}
+                                                    </h3>
+                                                    <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${getSkillColor(game.skillLevel)}`}>
+                                                        {game.skillLevel}
+                                                    </span>
                                                 </div>
 
-                                                <Link
-                                                    to={`/games/${game._id}`}
-                                                    className={`w-full block text-center py-2.5 rounded-lg font-bold text-sm transition ${game.players.length >= game.maxPlayers ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-500 text-white hover:bg-green-600 shadow-md shadow-green-200'}`}
-                                                >
-                                                    {game.players.length >= game.maxPlayers ? 'Match Full' : 'Join Match'}
-                                                </Link>
+                                                <div className="space-y-2 mt-2 mb-6">
+                                                    <div className="flex items-center text-sm text-gray-500">
+                                                        <span className="w-5 text-center mr-2">📅</span>
+                                                        {new Date(game.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} • {new Date(game.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </div>
+                                                    <div className="flex items-center text-sm text-gray-500">
+                                                        <span className="w-5 text-center mr-2">📍</span>
+                                                        {game.location.split(',')[0]}
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-auto">
+                                                    <div className="flex justify-between text-xs font-semibold text-gray-500 mb-1">
+                                                        <span>Players</span>
+                                                        <span className={game.players.length >= game.maxPlayers ? 'text-red-500' : 'text-green-600'}>
+                                                            {game.players.length}/{game.maxPlayers} spots filled
+                                                        </span>
+                                                    </div>
+                                                    <div className="w-full bg-gray-100 rounded-full h-2 mb-4 overflow-hidden">
+                                                        <div
+                                                            className={`h-full rounded-full ${game.players.length >= game.maxPlayers ? 'bg-red-500' : 'bg-green-500'}`}
+                                                            style={{ width: `${(game.players.length / game.maxPlayers) * 100}%` }}
+                                                        ></div>
+                                                    </div>
+
+                                                    <Link
+                                                        to={`/games/${game._id}`}
+                                                        className={`w-full block text-center py-2.5 rounded-lg font-bold text-sm transition ${isJoined
+                                                                ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border border-indigo-200'
+                                                                : game.players.length >= game.maxPlayers
+                                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                    : 'bg-green-500 text-white hover:bg-green-600 shadow-md shadow-green-200'
+                                                            }`}
+                                                    >
+                                                        {isJoined ? 'View Details' : (game.players.length >= game.maxPlayers ? 'Match Full' : 'Join Match')}
+                                                    </Link>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )) : (
+                                    );
+                                }) : (
                                     <div className="col-span-full flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-dashed border-gray-300">
                                         <div className="text-4xl mb-4">🔍</div>
                                         <h3 className="text-xl font-bold text-gray-900 mb-2">No matches found</h3>
