@@ -5,14 +5,27 @@ import Constants from 'expo-constants';
 // Get API URL from app.json extra config or fallback to localhost
 // Ideally this comes from environment variables
 // using the LAN IP from the Expo start output
-const BASE_URL = Constants.expoConfig?.extra?.apiUrl || 'http://10.195.29.72:5000/api';
+const BASE_URL = Constants.expoConfig?.extra?.apiUrl || 'http://10.195.29.111:5000/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
+  timeout: 10000, // 10 seconds timeout
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Log outgoing requests for debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log(`[API Request] ${config.method.toUpperCase()} ${config.baseURL}${config.url}`);
+    return config;
+  },
+  (error) => {
+    console.error('[API Request Error]', error);
+    return Promise.reject(error);
+  }
+);
 
 // Request interceptor to add the auth token header to requests
 api.interceptors.request.use(

@@ -135,6 +135,42 @@ const Profile = () => {
                                 </div>
                             </div>
 
+                            {/* Athlete Passport - Hackathon Feature */}
+                            <div className="mt-12 bg-indigo-50 rounded-2xl p-6 border border-indigo-100">
+                                <h3 className="text-lg font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                                    <span>🎖️</span> Athlete Passport
+                                </h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    {[
+                                        { icon: "🏅", label: "Early Bird", earned: true },
+                                        { icon: "🔥", label: "Game Streak", earned: true },
+                                        { icon: "🤝", label: "Teammate", earned: false },
+                                        { icon: "⚽", label: "Goal Getter", earned: false }
+                                    ].map((badge, idx) => (
+                                        <div key={idx} className={`p-4 rounded-xl flex flex-col items-center justify-center text-center ${badge.earned ? 'bg-white shadow-sm' : 'opacity-40 grayscale bg-gray-100'}`}>
+                                            <span className="text-2xl mb-2">{badge.icon}</span>
+                                            <span className="text-[10px] font-bold uppercase tracking-tight text-gray-600">{badge.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Active Stats */}
+                            <div className="mt-8 grid grid-cols-3 gap-4">
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                                    <span className="block text-2xl font-bold text-indigo-600">12</span>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase">Games Joined</span>
+                                </div>
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                                    <span className="block text-2xl font-bold text-green-600">5</span>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase">Wins</span>
+                                </div>
+                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                                    <span className="block text-2xl font-bold text-indigo-600">4.9</span>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase">Rating</span>
+                                </div>
+                            </div>
+
                             <div className="flex justify-end pt-4">
                                 <button type="submit" className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition shadow-md">
                                     Save Changes

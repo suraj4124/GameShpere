@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Alert, Image, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Image, StatusBar, TouchableOpacity } from 'react-native';
 import axios from '../../api/axios';
 import ButtonPrimary from '../../components/ButtonPrimary';
 import Loader from '../../components/Loader';

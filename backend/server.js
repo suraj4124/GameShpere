@@ -26,6 +26,12 @@ const join = require('./routes/join.routes');
 
 const app = express();
 
+// Simple request logger
+app.use((req, res, next) => {
+    console.log(`[Backend Request] ${req.method} ${req.url}`);
+    next();
+});
+
 // Body parser
 app.use(express.json());
 
@@ -55,7 +61,7 @@ app.use(limiter);
 app.use(hpp());
 
 // Enable CORS
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors());
 
 // Mount routers
 app.use('/api/auth', auth);

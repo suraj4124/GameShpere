@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 // Note: DateTimePicker requires an extra package installation which was not in the prompt's list
 // but is standard for Expo. I'll use text input for simplicity to stick to base requirements, 
 // or I can simulate it. The prompt asked for "Date picker" and "Time picker". 

@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         setIsLoading(true);
+        console.log(`Attempting login to: ${axios.defaults.baseURL}/auth/login`);
         try {
             const response = await axios.post('/auth/login', {
                 email,
