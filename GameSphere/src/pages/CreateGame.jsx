@@ -2,11 +2,13 @@ import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import AuthContext from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const CreateGame = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
+        title: '',
         sport: 'Football',
         date: '',
         location: '',
@@ -18,7 +20,7 @@ const CreateGame = () => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [createdGameId, setCreatedGameId] = useState(null);
 
-    const { sport, date, location, skillLevel, maxPlayers, entryFee, description } = formData;
+    const { title, sport, date, location, skillLevel, maxPlayers, entryFee, description } = formData;
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -26,10 +28,12 @@ const CreateGame = () => {
         e.preventDefault();
         try {
             const res = await axios.post('/api/games', formData);
-            setCreatedGameId(res.data._id);
+            setCreatedGameId(res.data.data._id); // Updated to match new response structure path
             setShowSuccess(true);
+            toast.success('Game created successfully!');
         } catch (err) {
             console.error('Error creating game', err);
+            toast.error(err.response?.data?.error || 'Failed to create game');
         }
     };
 
@@ -45,6 +49,14 @@ const CreateGame = () => {
                 </div>
 
                 <form onSubmit={onSubmit} className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-bold text-gray-900 mb-2">Game Title</label>
+                        <div className="relative">
+                            <span className="absolute left-3 top-3.5 text-gray-400">🏆</span>
+                            <input type="text" name="title" value={title} onChange={onChange} className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium text-gray-700" placeholder="e.g. Sunday Morning 5v5" required />
+                        </div>
+                    </div>
+
                     <div>
                         <label className="block text-sm font-bold text-gray-900 mb-2">Select Sport</label>
                         <select name="sport" value={sport} onChange={onChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium text-gray-700">

@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import AuthContext from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const GameDetails = () => {
     const { id } = useParams();
@@ -14,11 +15,12 @@ const GameDetails = () => {
         const fetchGame = async () => {
             try {
                 const res = await axios.get(`/api/games/${id}`);
-                setGame(res.data);
+                setGame(res.data.data); // Updated response path
                 setLoading(false);
             } catch (err) {
                 setError('Game not found');
                 setLoading(false);
+                toast.error('Could not load game details');
             }
         };
         fetchGame();
@@ -26,10 +28,11 @@ const GameDetails = () => {
 
     const handleJoin = async () => {
         try {
-            const res = await axios.post(`/api/games/${id}/join`);
-            setGame(res.data);
+            const res = await axios.post(`/api/games/${id}/join`); // Updated route
+            setGame(res.data.data); // Updated response path
+            toast.success('Joined game successfully!');
         } catch (err) {
-            alert(err.response?.data?.msg || 'Error joining game');
+            toast.error(err.response?.data?.error || 'Error joining game');
         }
     };
 
@@ -153,7 +156,9 @@ const GameDetails = () => {
                                         </div>
                                         <div>
                                             <p className="font-bold text-gray-900">{player.name}</p>
-                                            <p className="text-xs text-gray-500 font-bold uppercase">{idx === 0 ? 'Host' : 'Player'}</p>
+                                            <p className="text-xs text-gray-500 font-bold uppercase">
+                                                {player._id === game.organizer._id ? 'Host' : 'Player'}
+                                            </p>
                                         </div>
                                     </div>
                                 ))}

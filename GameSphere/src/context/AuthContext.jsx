@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const AuthContext = createContext();
 
@@ -8,18 +9,10 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const loadUser = async () => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            axios.defaults.headers.common["x-auth-token"] = token;
-            try {
-                const res = await axios.get("/api/auth");
-                setUser(res.data);
-            } catch (error) {
-                localStorage.removeItem("token");
-                delete axios.defaults.headers.common["x-auth-token"];
-                setUser(null);
-            }
-        } else {
+        try {
+            const res = await axios.get("/api/auth/me"); // Updated path to match new routes
+            setUser(res.data.data); // Updated to match new response structure { success: true, data: user }
+        } catch (error) {
             setUser(null);
         }
         setLoading(false);
@@ -30,23 +23,36 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        const res = await axios.post("/api/auth/login", { email, password });
-        localStorage.setItem("token", res.data.token);
-        axios.defaults.headers.common["x-auth-token"] = res.data.token;
-        setUser(res.data.user);
+        try {
+            await axios.post("/api/auth/login", { email, password });
+            await loadUser();
+            toast.success("Logged in successfully!");
+        } catch (err) {
+            toast.error(err.response?.data?.error || "Login failed");
+            throw err;
+        }
     };
 
     const register = async (userData) => {
-        const res = await axios.post("/api/auth/register", userData);
-        localStorage.setItem("token", res.data.token);
-        axios.defaults.headers.common["x-auth-token"] = res.data.token;
-        await loadUser();
+        try {
+            await axios.post("/api/auth/register", userData);
+            await loadUser();
+            toast.success("Account created successfully!");
+        } catch (err) {
+            toast.error(err.response?.data?.error || "Registration failed");
+            throw err;
+        }
     };
 
-    const logout = () => {
-        localStorage.removeItem("token");
-        delete axios.defaults.headers.common["x-auth-token"];
-        setUser(null);
+    const logout = async () => {
+        try {
+            await axios.get("/api/auth/logout"); // Updated to GET based on new controller
+            setUser(null);
+            toast.success("Logged out successfully");
+            // Clear local games/data if needed
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     return (

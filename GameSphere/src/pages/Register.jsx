@@ -15,7 +15,7 @@ const Register = () => {
     const { register } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    const { name, email, password, role } = formData;
+    const { name, email, password, role, sports, skillLevel } = formData;
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
     const setRole = (r) => setFormData({ ...formData, role: r });
@@ -23,7 +23,13 @@ const Register = () => {
     const onSubmit = async e => {
         e.preventDefault();
         try {
-            await register(formData);
+            // Convert sports string to array
+            const sportsArray = formData.sports.split(',').map(s => s.trim()).filter(s => s);
+
+            await register({
+                ...formData,
+                sports: sportsArray
+            });
             navigate('/');
         } catch (err) {
             console.error('Register Error', err);
@@ -36,7 +42,7 @@ const Register = () => {
             <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 lg:p-24 overflow-y-auto">
                 <div className="mb-10">
                     <Link to="/" className="flex items-center gap-2 text-indigo-900 font-extrabold text-2xl mb-12">
-                        🏀 TeamUp
+                        🏀 GameSphere
                     </Link>
                     <h1 className="text-4xl font-extrabold text-gray-900 mb-3">Get in the game.</h1>
                     <p className="text-gray-500">Join thousands of local athletes and organizers today.</p>
@@ -74,11 +80,33 @@ const Register = () => {
                             <input type="email" name="email" value={email} onChange={onChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50" placeholder="name@example.com" required />
                         </div>
                     </div>
+                    {role === 'player' && (
+                        <>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Sports</label>
+                                <div className="relative">
+                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">⚽</span>
+                                    <input type="text" name="sports" value={formData.sports} onChange={onChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50" placeholder="e.g. Football, Basketball (comma separated)" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Skill Level</label>
+                                <div className="relative">
+                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">📊</span>
+                                    <select name="skillLevel" value={formData.skillLevel} onChange={onChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50">
+                                        <option value="Beginner">Beginner</option>
+                                        <option value="Intermediate">Intermediate</option>
+                                        <option value="Pro">Pro</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </>
+                    )}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
                         <div className="relative">
                             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">🔒</span>
-                            <input type="password" name="password" value={password} onChange={onChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50" placeholder="••••••••" required />
+                            <input type="password" name="password" value={password} onChange={onChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50" placeholder="••••••••" required minLength="6" />
                         </div>
                     </div>
 
@@ -126,7 +154,7 @@ const Register = () => {
 
                 <div className="absolute bottom-16 left-16 right-16 text-white">
                     <h2 className="text-4xl font-extrabold leading-tight mb-6">
-                        "TeamUp made it incredibly easy to find a local league. Now I play every Tuesday!"
+                        "GameSphere made it incredibly easy to find a local league. Now I play every Tuesday!"
                     </h2>
                     <div className="flex items-center gap-4">
                         <img src="https://i.pravatar.cc/150?img=11" alt="User" className="w-12 h-12 rounded-full border-2 border-white/50" />

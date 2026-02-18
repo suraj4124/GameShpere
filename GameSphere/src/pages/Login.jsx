@@ -30,7 +30,7 @@ const Login = () => {
             <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 lg:p-24 overflow-y-auto">
                 <div className="mb-12">
                     <Link to="/" className="flex items-center gap-2 text-indigo-900 font-extrabold text-2xl mb-12">
-                        🏀 TeamUp
+                        🏀 GameSphere
                     </Link>
                     <h1 className="text-4xl font-extrabold text-gray-900 mb-3">Welcome back.</h1>
                     <p className="text-gray-500">Please enter your details to sign in.</p>
