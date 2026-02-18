@@ -149,22 +149,23 @@ const Home = () => {
                             { name: "Cricket", count: "56 active games", image: "https://images.unsplash.com/photo-1531415074968-bc0886d19065?q=80&w=2070&auto=format&fit=crop", icon: "🏏" },
                             { name: "Tennis", count: "42 active games", image: "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?q=80&w=2070&auto=format&fit=crop", icon: "🎾" }
                         ].map((sport, idx) => (
-                            <motion.div
-                                key={idx}
-                                className="relative h-64 lg:h-80 rounded-3xl overflow-hidden shadow-lg group cursor-pointer"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: idx * 0.1 }}
-                            >
-                                <img src={sport.image} alt={sport.name} className="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-110" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                                <div className="absolute bottom-0 left-0 p-6 text-white relative z-10">
-                                    <div className="text-4xl mb-2 transform group-hover:scale-110 transition duration-300 inline-block">{sport.icon}</div>
-                                    <h3 className="text-xl font-bold">{sport.name}</h3>
-                                    <p className="text-xs opacity-80">{sport.count}</p>
-                                </div>
-                            </motion.div>
+                            <Link key={idx} to={`/events?sport=${sport.name}`}>
+                                <motion.div
+                                    className="relative h-64 lg:h-80 rounded-3xl overflow-hidden shadow-lg group cursor-pointer"
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: idx * 0.1 }}
+                                >
+                                    <img src={sport.image} alt={sport.name} className="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-110" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                                    <div className="absolute bottom-0 left-0 p-6 text-white relative z-10">
+                                        <div className="text-4xl mb-2 transform group-hover:scale-110 transition duration-300 inline-block">{sport.icon}</div>
+                                        <h3 className="text-xl font-bold">{sport.name}</h3>
+                                        <p className="text-xs opacity-80">{sport.count}</p>
+                                    </div>
+                                </motion.div>
+                            </Link>
                         ))}
                     </div>
 

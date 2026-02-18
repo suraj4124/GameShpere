@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const Events = () => {
+    const [searchParams] = useSearchParams();
     const [games, setGames] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState({
-        sport: 'All',
+        sport: searchParams.get('sport') || 'All',
         location: '',
         date: '',
         skillLevel: 'Any Level'
     });
+
+    useEffect(() => {
+        const sportFromQuery = searchParams.get('sport');
+        if (sportFromQuery) {
+            setFilter(prev => ({ ...prev, sport: sportFromQuery }));
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         const fetchGames = async () => {
@@ -53,8 +61,22 @@ const Events = () => {
         <div className="min-h-screen bg-gray-50 font-sans">
             <div className="container mx-auto px-4 py-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-extrabold text-gray-900 mb-2">All Events</h1>
-                    <p className="text-gray-500">Browse all upcoming sports events in your community.</p>
+                    <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
+                        {filter.sport === 'All' ? 'All Events' : `${filter.sport} Events`}
+                    </h1>
+                    <p className="text-gray-500">
+                        {filter.sport === 'All'
+                            ? 'Browse all upcoming sports events in your community.'
+                            : `Showing all upcoming ${filter.sport} events.`}
+                    </p>
+                    {filter.sport !== 'All' && (
+                        <button
+                            onClick={() => setFilter(prev => ({ ...prev, sport: 'All' }))}
+                            className="mt-4 text-indigo-600 font-bold hover:underline flex items-center gap-1"
+                        >
+                            <span>←</span> Back to All Events
+                        </button>
+                    )}
                 </div>
 
                 {loading ? (
